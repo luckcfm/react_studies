@@ -21,7 +21,6 @@ class App extends Component {
     this.addTodo = this.addTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
     this.updateTodo = this.updateTodo.bind(this);
-    this.generateTodoId = this.generateTodoId.bind(this);
     this.alert = this.alert.bind(this);
   }
 
@@ -41,22 +40,17 @@ class App extends Component {
       newTodo: event.target.value
     });
   }
-  generateTodoId () {
-    const lastTodo = this.state.todos[this.state.todos.length - 1];
 
-    if(lastTodo)
-      return lastTodo.id + 1;
+  async addTodo () {
+   
+    const response = await axios.post(`${this.apiUrl}/todos`, {
+      name: this.state.newTodo
+    });
 
-    return 1;
-  }
-  addTodo () {
-    const newTodo = {
-      name: this.state.newTodo,
-      id: this.generateTodoId()
-    };
+    console.log(response);
     const oldTodos = this.state.todos;
 
-    oldTodos.push(newTodo);
+    oldTodos.push(response.data);
 
     this.setState({
       todos: oldTodos,
@@ -84,8 +78,12 @@ class App extends Component {
       newTodo: todo.name
     })
   }
-  deleteTodo (index) {
+  async deleteTodo (index) {
+    
     const todos = this.state.todos;
+    const todo = todos[index];
+    await axios.delete(`${this.apiUrl}/todos/${todo.id}`);
+
     delete todos[index];
     this.setState({todos});
     this.alert('Todo deleted successfully!');
