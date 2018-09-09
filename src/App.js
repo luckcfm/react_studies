@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-
+import ListItem from './ListItem';
 class App extends Component {
   constructor() {
     super();
@@ -26,6 +26,7 @@ class App extends Component {
     this.deleteTodo = this.deleteTodo.bind(this);
     this.updateTodo = this.updateTodo.bind(this);
     this.generateTodoId = this.generateTodoId.bind(this);
+    this.alert = this.alert.bind(this);
   }
 
   handleChange(event) {
@@ -54,6 +55,9 @@ class App extends Component {
       todos: oldTodos,
       newTodo: ''
     });
+  }
+  alert() {
+
   }
   editTodo (index) {
     const todo = this.state.todos[index];
@@ -103,21 +107,12 @@ class App extends Component {
           !this.state.editing && 
           <ul className="list-group">
           {this.state.todos.map((item,index) => {
-            return <li 
-                key={item.id} 
-                className="list-group-item">
-                 <button 
-                onClick={() => {this.editTodo(index)}} 
-                className="btn-sm btn btn-info mr-4">
-                U
-              </button> 
-                {item.name}
-              <button 
-                onClick={() => {this.deleteTodo(index)}} 
-                className="btn-sm btn btn-danger ml-4">
-                X
-              </button> 
-            </li>
+            return <ListItem 
+                key={item.id}
+                item={item}
+                editTodo={() => {this.editTodo(index);}}
+                deleteTodo={() => {this.deleteTodo(index);}}
+                />
           } )}
         </ul>
         }
