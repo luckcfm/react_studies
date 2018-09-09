@@ -1,7 +1,9 @@
+import axios from 'axios';
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import ListItem from './ListItem';
+
 class App extends Component {
   constructor() {
     super();
@@ -10,17 +12,11 @@ class App extends Component {
       newTodo: 'Wash the dishes',
       editing: false,
       editingIndex: null,
-      todos: [{
-        id: 1,name :'Play golf'
-      },{
-        id: 2,name :'Buy some clothes'
-      },{
-        id: 3,name :'Write some code'
-      },{
-        id: 4,name :'Watch badcast'
-      }]
+      notification: null,
+      todos: []
     };
 
+    this.apiUrl = 'https://5b95a17e52764b001413bb3a.mockapi.io/'
     this.handleChange = this.handleChange.bind(this);
     this.addTodo = this.addTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
@@ -29,6 +25,17 @@ class App extends Component {
     this.alert = this.alert.bind(this);
   }
 
+  componentWillMount() {
+    console.log('Component will mout!');
+  }
+  async componentDidMount() {
+    const response = await axios.get(`${this.apiUrl}/todos`);
+    console.log(response);
+
+    this.setState({
+      todos: response.data
+    });
+  }
   handleChange(event) {
     this.setState({
       newTodo: event.target.value
@@ -55,9 +62,19 @@ class App extends Component {
       todos: oldTodos,
       newTodo: ''
     });
-  }
-  alert() {
 
+    this.alert('Todo added successfully');
+  }
+  alert(notification) {
+    this.setState({
+      notification
+    });
+
+    setTimeout(() => {
+      this.setState({
+        notification: null
+      });
+    } ,2000);
   }
   editTodo (index) {
     const todo = this.state.todos[index];
@@ -71,6 +88,7 @@ class App extends Component {
     const todos = this.state.todos;
     delete todos[index];
     this.setState({todos});
+    this.alert('Todo deleted successfully!');
   }
   updateTodo(index) {
     const todo = this.state.todos[this.state.editingIndex];
@@ -82,6 +100,8 @@ class App extends Component {
     todos[this.state.editingIndex] = todo;
 
     this.setState({todos,editing: false, editingIndex: null, newTodo: ''});
+
+    this.alert('Updated successfully');
   }
   render() {
     console.log(this.state.newTodo);
@@ -92,6 +112,11 @@ class App extends Component {
           <h1 className="App-title">CRUD REACT</h1>
         </header>
         <div className="container">
+         { this.state.notification && 
+         <div className="alert alert-success mt-3">
+          <p className="text-center">{this.state.notification}</p>
+         </div>
+         }
       <input 
         type="text" 
         name="todo"
@@ -100,7 +125,11 @@ class App extends Component {
         value={this.state.newTodo}
         onChange={this.handleChange}
         />
-        <button onClick={this.state.editing ? this.updateTodo : this.addTodo} className="btn-info mb-3 form-control">
+        <button 
+        onClick={this.state.editing ? this.updateTodo : this.addTodo} 
+        className="btn-success mb-3 form-control"
+        disabled={this.state.newTodo.length < 5}
+        >
           {this.state.editing ? 'UPDATE TODO' : 'ADD TODO'}
         </button>
         {
