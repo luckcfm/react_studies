@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import ListItem from './ListItem';
-
+import loadingGif from './loading.gif';
 class App extends Component {
   constructor() {
     super();
@@ -13,7 +13,8 @@ class App extends Component {
       editing: false,
       editingIndex: null,
       notification: null,
-      todos: []
+      todos: [],
+      loading: true
     };
 
     this.apiUrl = 'https://5b95a17e52764b001413bb3a.mockapi.io/'
@@ -32,8 +33,11 @@ class App extends Component {
     console.log(response);
 
     this.setState({
-      todos: response.data
+      todos: response.data,
+      loading: false
     });
+
+
   }
   handleChange(event) {
     this.setState({
@@ -88,18 +92,22 @@ class App extends Component {
     this.setState({todos});
     this.alert('Todo deleted successfully!');
   }
-  updateTodo(index) {
+  async updateTodo(index) {
     const todo = this.state.todos[this.state.editingIndex];
 
-    todo.name = this.state.newTodo;
+    const response = await axios.put(`${this.apiUrl}/todos/${todo.id}`,
+    {
+      name: this.state.newTodo
+    }
+  );
+
 
     const todos = this.state.todos;
-
-    todos[this.state.editingIndex] = todo;
-
+    todos[this.state.editingIndex] = response.data;
     this.setState({todos,editing: false, editingIndex: null, newTodo: ''});
-
     this.alert('Updated successfully');
+
+
   }
   render() {
     console.log(this.state.newTodo);
@@ -130,8 +138,15 @@ class App extends Component {
         >
           {this.state.editing ? 'UPDATE TODO' : 'ADD TODO'}
         </button>
+
+         {
+           this.state.loading &&
+           <img src={loadingGif} alt=""></img>
+         }
+
+
         {
-          !this.state.editing && 
+          (!this.state.editing || this.state.loading) && 
           <ul className="list-group">
           {this.state.todos.map((item,index) => {
             return <ListItem 
